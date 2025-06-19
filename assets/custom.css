@@ -1,0 +1,119 @@
+/* General Body and Container */
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+}
+
+.dbc-container, .dbc-container-fluid { /* Assuming dbc.Container adds these classes or use app specific class */
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+h1 {
+    font-size: 2.2em;
+    color: #333;
+}
+
+h2 {
+    font-size: 1.8em;
+    color: #444;
+}
+
+h3 {
+    font-size: 1.5em;
+    color: #555;
+}
+
+h4 { /* Used for section titles, policy categories */
+    font-size: 1.3em;
+    color: #007bff; /* Bootstrap primary color for emphasis */
+    margin-top: 20px;
+}
+
+h5 { /* Used for subsection titles, policy titles in accordions */
+    font-size: 1.15em;
+    color: #333;
+}
+
+h6 { /* Used for control titles, policy short names */
+    font-size: 1.0em;
+    color: #484848;
+}
+
+
+/* Accordion styling */
+.accordion-item {
+    margin-bottom: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: .25rem;
+}
+.accordion-button:not(.collapsed) {
+    color: #0c63e4;
+    background-color: #e7f1ff;
+}
+.accordion-body {
+    padding: 1rem 1.25rem;
+}
+.accordion-body h5 { /* Policy titles within accordion */
+    margin-top: 0.5rem;
+}
+
+
+/* ListGroup styling */
+.list-group-item {
+    border-color: #e0e0e0; /* Slightly softer border */
+}
+.list-group-item:hover {
+    background-color: #f8f9fa; /* Light hover effect */
+}
+.control-list-item, .standard-list-item { /* Custom classes if needed, or target .list-group-item[action=true] */
+    cursor: pointer;
+}
+
+
+/* Card styling for details */
+.card {
+    margin-top: 15px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.card-header {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    border-bottom: 1px solid #ddd;
+}
+.card-body .card-title {
+    color: #0056b3; /* Darker blue for titles in cards */
+}
+
+
+/* Tab content spacing */
+#tab-content {
+    padding-top: 20px;
+}
+
+/* Specific detail sections for better readability */
+#control-detail-output .card-body p,
+#standard-detail-output .card-body p,
+.accordion-body p {
+    margin-bottom: 0.5rem; /* Tighter spacing for paragraphs in detail sections */
+    font-size: 0.95em;
+}
+
+#standard-detail-output ul {
+    padding-left: 20px; /* Indent lists slightly */
+}
+#standard-detail-output li {
+    margin-bottom: 0.3rem;
+}
+
+/* Markdown specific styling if needed */
+.markdown-description p {
+    margin-bottom: 0.5rem;
+}
