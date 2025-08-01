@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Policy Document Editor</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 960px; margin: auto; }
+    #editor-container { height: 400px; background: white; margin-bottom: 20px; }
+    input, select { padding: 8px; margin: 5px 0 15px; width: 100%; }
+    button { padding: 10px 15px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<h2>Edit Compliance Policy</h2>
+
+<label for="framework">Select Framework</label>
+<select id="framework"></select>
+
+<label for="policyTitle">Policy Title</label>
+<input type="text" id="policyTitle" placeholder="Enter policy title" />
+
+<label for="version">Version</label>
+<input type="text" id="version" placeholder="Enter version (e.g., v1.0)" />
+
+<label for="pdfInput">Upload PDF (optional)</label>
+<input type="file" id="pdfInput" accept="application/pdf" />
+
+<div id="editor-container"></div>
+<button onclick="uploadPolicy()">Upload to Server</button>
+
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+<script>
+  let quill = new Quill('#editor-container', {
+    theme: 'snow',
+    placeholder: 'Edit the policy content here...'
+  });
+
+  async function fetchFrameworks() {
+    const res = await fetch('/api/frameworks/');
+    const data = await res.json();
+    const dropdown = document.getElementById('framework');
+    data.forEach(fw => {
+      const opt = document.createElement('option');
+      opt.value = fw.id;
+      opt.textContent = fw.name;
+      dropdown.appendChild(opt);
+    });
+  }
+
+  document.getElementById('pdfInput').addEventListener('change', async function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function () {
+      const typedArray = new Uint8Array(reader.result);
+      const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+
+      let fullText = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        fullText += textContent.items.map(i => i.str).join('\n') + '\n';
+      }
+
+      const lines = fullText.trim().split('\n').filter(line => line.trim() !== '');
+
+      if (lines.length >= 2) {
+        let title = lines[0].trim();
+        let versionRaw = lines[1].trim();
+        let version = versionRaw.startsWith("Version:") ? versionRaw.replace(/^Version:\s*/i, '') : versionRaw;
+
+        document.getElementById('policyTitle').value = title;
+        document.getElementById('version').value = version;
+
+        let contentLines = lines.slice(2);
+        quill.setText(contentLines.join('\n').trim());
+      } else {
+        alert("Could not extract title and version from the PDF.");
+      }
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  async function uploadPolicy() {
+    const title = document.getElementById('policyTitle').value;
+    const version = document.getElementById('version').value;
+    const frameworkId = document.getElementById('framework').value;
+    const file = document.getElementById('pdfInput').files[0];
+    const textContent = quill.getText().trim();
+
+    if (!title || !version || !frameworkId || (!file && !textContent)) {
+      alert('Please fill in all required fields and provide either a PDF or text content.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('framework_id', frameworkId);
+    formData.append('policy_title', title);
+    formData.append('version', version); // Include version explicitly
+    if (file) {
+      formData.append('uploaded_file', file);
+    }
+    if (textContent) {
+      formData.append('text_content', textContent);
+    }
+
+    try {
+      const res = await fetch('/api/upload_policy_pdf/', {
+        method: 'POST',
+        body: formData
+      });
+      const json = await res.json();
+      if (res.ok) {
+        alert(json.message || 'Upload complete');
+      } else {
+        alert(json.error || 'Upload failed');
+      }
+    } catch (error) {
+      alert('Error uploading policy: ' + error.message);
+    }
+  }
+
+  fetchFrameworks();
+</script>
+
+</body>
+</html>
